@@ -35,7 +35,13 @@ public class TrainPlaceTool : Tool {
         {
             float distance;
             // TODO: Draw ghost instead
-            Highlighter.DrawHighlighter(Matrix4x4.Translate(GetSnappedTrackPosition(track.trackSection, info.hit.point, out distance)));
+            var matrix = Matrix4x4.TRS(GetSnappedTrackPosition(track.trackSection, info.hit.point, out distance),
+                track.trackSection.GetRotationOnTrack(distance),
+                Vector3.one);
+
+            Highlighter.DrawHighlighter(matrix);
+
+            Graphics.DrawMesh(selectedWagon.GetComponent<MeshFilter>().sharedMesh, matrix, selectedWagon.GetComponent<MeshRenderer>().sharedMaterial, gameObject.layer);
         }
 
     }
@@ -46,7 +52,7 @@ public class TrainPlaceTool : Tool {
         {
             // Place the selected wagon on the track
             float distance;
-            var pos = GetSnappedTrackPosition(track.trackSection, info.hit.point, out distance);
+            GetSnappedTrackPosition(track.trackSection, info.hit.point, out distance);
             PlaceSelected(track.trackSection, distance);
         }
     }
