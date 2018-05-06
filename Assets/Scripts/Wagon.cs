@@ -87,12 +87,12 @@ public class Wagon : MonoBehaviour, IActivatable {
         if(frontCoupler.Coupled)
         {
             var dv = frontCoupler.other.wagon.PreviousSpeedVector - velocity;
-            frontCoupler.ApplyForce(dv * rigidbody.mass, false);
+            //frontCoupler.ApplyForce(dv * rigidbody.mass, false);
         }
         if(rearCoupler.Coupled)
         {
             var dv = rearCoupler.other.wagon.PreviousSpeedVector - velocity;
-            rearCoupler.ApplyForce(dv * rigidbody.mass, false);
+            //rearCoupler.ApplyForce(dv * rigidbody.mass, false);
         }
     }
 
