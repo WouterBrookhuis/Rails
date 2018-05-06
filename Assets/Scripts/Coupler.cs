@@ -26,6 +26,7 @@ public class Coupler : MonoBehaviour, IActivatable
     public void Couple(Coupler other)
     {
         Decouple();
+        if(wagon.Placed == false || other.wagon.Placed == false) return;
         this.other = other;
         other.other = this;
     }
