@@ -81,19 +81,6 @@ public class Wagon : MonoBehaviour, IActivatable {
         {
             return;
         }
-
-        // Use previous frame's speed as basis for force calculation
-        var velocity = PreviousSpeedVector;
-        if(frontCoupler.Coupled)
-        {
-            var dv = frontCoupler.other.wagon.PreviousSpeedVector - velocity;
-            //frontCoupler.ApplyForce(dv * rigidbody.mass, false);
-        }
-        if(rearCoupler.Coupled)
-        {
-            var dv = rearCoupler.other.wagon.PreviousSpeedVector - velocity;
-            //rearCoupler.ApplyForce(dv * rigidbody.mass, false);
-        }
     }
 
     // Update is called once per frame
