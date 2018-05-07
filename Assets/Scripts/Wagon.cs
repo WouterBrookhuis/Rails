@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody))]
@@ -25,6 +26,30 @@ public class Wagon : MonoBehaviour, IActivatable {
 
     public Coupler frontCoupler;
     public Coupler rearCoupler;
+
+    public Wagon Next
+    {
+        get
+        {
+            if(rearCoupler.Coupled)
+            {
+                return rearCoupler.other.wagon;
+            }
+            return null;
+        }
+    }
+
+    public Wagon Previous
+    {
+        get
+        {
+            if(frontCoupler.Coupled)
+            {
+                return frontCoupler.other.wagon;
+            }
+            return null;
+        }
+    }
 
     public bool Placed { get { return placed; } }
 
@@ -190,5 +215,73 @@ public class Wagon : MonoBehaviour, IActivatable {
         if(isKinematic) return;
         var acceleration = forceForward / rigidbody.mass;
         speed += acceleration * Time.deltaTime;
+    }
+
+    public void OnCoupled(Wagon to)
+    {
+        Debug.LogFormat("Wagon {0} coupled to {1}", name, to.name);
+
+        var sb = new StringBuilder();
+        var it = new TrainIterator(this, true);
+
+        // Move to end of train
+        Wagon lastWagon = this;
+        while(it.HasNext())
+        {
+            lastWagon = it.Next();
+        }
+        // Flip around iterator, so we now iterate from the back to the front
+        it.Flip();
+        sb.Append(lastWagon.name);
+        while(it.HasNext())
+        {
+            sb.AppendFormat(" - {0}", it.Next().name);
+        }
+
+        Debug.LogFormat("Train consist: {0}", sb.ToString());
+    }
+}
+
+public class TrainIterator
+{
+    private Wagon wagon;
+    private bool reverse;
+
+    public TrainIterator(Wagon start, bool reverse = false)
+    {
+        wagon = start;
+        this.reverse = reverse;
+    }
+
+    public void Flip()
+    {
+        reverse = !reverse;
+    }
+
+    public bool HasNext()
+    {
+        return reverse ? wagon.Previous != null : wagon.Next != null;
+    }
+
+    public Wagon Next()
+    {
+        var nextWagon = reverse ? wagon.Previous : wagon.Next;
+        // Check if we need to invert on the next wagon
+        if(IsRelativeInverted(wagon, nextWagon))
+        {
+            reverse = !reverse;
+        }
+        wagon = nextWagon;
+        return wagon;
+    }
+
+    private bool IsRelativeInverted(Wagon from, Wagon to)
+    {
+        if(from.Next == to && to.Next == from ||
+            from.Previous == to && to.Previous == from)
+        {
+            return true;
+        }
+        return false;
     }
 }

@@ -29,6 +29,9 @@ public class Coupler : MonoBehaviour, IActivatable
         if(wagon.Placed == false || other.wagon.Placed == false) return;
         this.other = other;
         other.other = this;
+
+        wagon.OnCoupled(other.wagon);
+        other.wagon.OnCoupled(wagon);
     }
 
     public void Decouple()
@@ -52,6 +55,7 @@ public class Coupler : MonoBehaviour, IActivatable
         if(other != null)
         {
             yawTransform.LookAt(other.yawTransform);
+
             // Apply impact forces at slack extremes
             var distanceBetween = Vector3.Distance(yawTransform.position, other.transform.position) - transform.localPosition.z;
             var factor = other.wagon.isKinematic ? 1.0f : 2.0f;
