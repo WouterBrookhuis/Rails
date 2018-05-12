@@ -3,7 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BasicTrackLayerTool : Tool {
+public class BasicTrackLayerTool : Tool
+{
 
     private TrackLayer trackLayer;
     public Switch switchPrefab;
@@ -11,9 +12,9 @@ public class BasicTrackLayerTool : Tool {
     public float angle = 15.0f;
     public Material trackMaterial;
     public LayerMask terrainMask;
-
     private TrackSection lastHighlightedSection;
     private bool shouldInvertOnReposition;
+    private TrackSection lastSection;
 
     public TrackLayer TrackLayer { get { return trackLayer; } }
 
@@ -32,15 +33,29 @@ public class BasicTrackLayerTool : Tool {
         }
     }
 
+    protected override void OnDisable()
+    {
+        base.OnDisable();
+        if(trackLayer != null && trackLayer.CurrentSection != null && trackLayer.CurrentSection.Component != null)
+        {
+            trackLayer.CurrentSection.Component.GetComponent<GlowObject>().DeactivateGlow();
+        }
+    }
+
     private void Update()
     {
-        if(trackLayer.CurrentSection != null)
+        if(lastSection != trackLayer.CurrentSection)
         {
-            Highlighter.DrawHighlighter(Matrix4x4.TRS(
-                trackLayer.Inverted ? trackLayer.CurrentSection.Position : trackLayer.CurrentSection.EndPosition,
-                Quaternion.identity,
-                Vector3.one));
+            if(lastSection != null && lastSection.Component != null)
+            {
+                lastSection.Component.GetComponent<GlowObject>().DeactivateGlow();
+            }
+            if(trackLayer.CurrentSection != null && trackLayer.CurrentSection.Component != null)
+            {
+                trackLayer.CurrentSection.Component.GetComponent<GlowObject>().ActivateGlow();
+            }
         }
+        lastSection = trackLayer.CurrentSection;
     }
 
     public override void OnTrackActivate(TrackSectionComponent track, ActivateInfo info)
@@ -59,6 +74,11 @@ public class BasicTrackLayerTool : Tool {
             }
             RemoveTrackSection(track);
         }
+    }
+
+    public override void OnTerrainHit(RaycastHit hit)
+    {
+        trackLayer.Reposition(null, false);
     }
 
     public override void OnTrackHover(TrackSectionComponent track, ActivateInfo info)
@@ -85,7 +105,7 @@ public class BasicTrackLayerTool : Tool {
             RaycastHit hit;
             if(FirstPersonController.Main.RaycastCameraForward(out hit, 1000.0f, terrainMask))
             {
-                section = trackLayer.StartTrack(hit.point + Vector3.up * 0.01f, Quaternion.FromToRotation(Vector3.forward, FirstPersonController.Main.transform.forward),
+                section = trackLayer.StartTrack(hit.point + Vector3.up * 0.01f, GetNewTrackRotation(hit),
                     length, -angle);
             }
         }
@@ -110,7 +130,7 @@ public class BasicTrackLayerTool : Tool {
             RaycastHit hit;
             if(FirstPersonController.Main.RaycastCameraForward(out hit, 1000.0f, terrainMask))
             {
-                section = trackLayer.StartTrack(hit.point + Vector3.up * 0.01f, Quaternion.FromToRotation(Vector3.forward, FirstPersonController.Main.transform.forward),
+                section = trackLayer.StartTrack(hit.point + Vector3.up * 0.01f, GetNewTrackRotation(hit),
                     length, angle);
             }
         }
@@ -135,7 +155,7 @@ public class BasicTrackLayerTool : Tool {
             RaycastHit hit;
             if(FirstPersonController.Main.RaycastCameraForward(out hit, 1000.0f, terrainMask))
             {
-                section = trackLayer.StartTrack(hit.point + Vector3.up * 0.01f, Quaternion.FromToRotation(Vector3.forward, FirstPersonController.Main.transform.forward), length);
+                section = trackLayer.StartTrack(hit.point + Vector3.up * 0.01f, GetNewTrackRotation(hit), length);
             }
         }
         if(section != null)
@@ -167,7 +187,7 @@ public class BasicTrackLayerTool : Tool {
             RaycastHit hit;
             if(FirstPersonController.Main.RaycastCameraForward(out hit, 1000.0f, terrainMask))
             {
-                section = trackLayer.StartTrack(hit.point + Vector3.up * 0.01f, Quaternion.FromToRotation(Vector3.forward, FirstPersonController.Main.transform.forward), 2.0f);
+                section = trackLayer.StartTrack(hit.point + Vector3.up * 0.01f, GetNewTrackRotation(hit), 2.0f);
             }
         }
         if(section != null)
@@ -215,7 +235,7 @@ public class BasicTrackLayerTool : Tool {
             RaycastHit hit;
             if(FirstPersonController.Main.RaycastCameraForward(out hit, 1000.0f, terrainMask))
             {
-                section = trackLayer.StartTrack(hit.point + Vector3.up * 0.01f, Quaternion.FromToRotation(Vector3.forward, FirstPersonController.Main.transform.forward), 2.0f);
+                section = trackLayer.StartTrack(hit.point + Vector3.up * 0.01f, GetNewTrackRotation(hit), 2.0f);
             }
         }
         if(section != null)
@@ -330,6 +350,12 @@ public class BasicTrackLayerTool : Tool {
             trackLayer.CurrentSection = null;
         }
     }
+
+    private Quaternion GetNewTrackRotation(RaycastHit hit)
+    {
+        var normalizedForward = Vector3.ProjectOnPlane(FirstPersonController.Main.pitchTransform.forward, hit.normal);
+        return Quaternion.LookRotation(normalizedForward, hit.normal);
+    }
     
     public static void RemoveTrackSection(TrackSectionComponent component)
     {
@@ -374,6 +400,8 @@ public class BasicTrackLayerTool : Tool {
         var go = new GameObject("Track Section");
         var tsc = go.AddComponent<TrackSectionComponent>();
         tsc.SetTrackSection(section, trackMaterial);
+        var glow = go.AddComponent<GlowObject>();
+        glow.glowColor = Color.red;
         return go;
     }
 }
