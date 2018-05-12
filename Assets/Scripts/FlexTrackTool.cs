@@ -32,6 +32,24 @@ public class FlexTrackTool : Tool
         ToState(State.Idle);
     }
 
+    protected override void OnEnable()
+    {
+        base.OnEnable();
+        if(fromSection != null && fromSection.Component != null)
+        {
+            fromSection.Component.GetComponent<GlowObject>().ActivateGlow();
+        }
+    }
+
+    protected override void OnDisable()
+    {
+        base.OnDisable();
+        if(fromSection != null && fromSection.Component != null)
+        {
+            fromSection.Component.GetComponent<GlowObject>().DeactivateGlow();
+        }
+    }
+
     public override void OnTrackActivate(TrackSectionComponent track, ActivateInfo info)
     {
         bool selectStart;
@@ -67,10 +85,18 @@ public class FlexTrackTool : Tool
         switch(newState)
         {
             case State.Idle:
+                if(fromSection != null && fromSection.Component != null)
+                {
+                    fromSection.Component.GetComponent<GlowObject>().DeactivateGlow();
+                }
                 fromSection = null;
                 statusText.text = "Click a track piece to start from";
                 break;
             case State.SelectedStart:
+                if(fromSection != null && fromSection.Component != null)
+                {
+                    fromSection.Component.GetComponent<GlowObject>().ActivateGlow();
+                }
                 statusText.text = "Click a track piece to go to";
                 break;
         }

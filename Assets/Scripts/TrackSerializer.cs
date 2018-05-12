@@ -79,8 +79,7 @@ public class TrackSerializer : AbstractSerializer
         var section = DeserializeTrackSection();
         var groupId = reader.ReadUInt16();
 
-        var component = new GameObject("Track Section").AddComponent<TrackSectionComponent>();
-        component.SetTrackSection(section, trackMaterial);
+        var component = BasicTrackLayerTool.PlaceTrackGO(section, trackMaterial).GetComponent<TrackSectionComponent>();
         if(groupId != 0)
         {
             if(!sectionGroupIds.ContainsKey(groupId))

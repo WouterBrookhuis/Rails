@@ -6,8 +6,9 @@ public static class Helper
 {
     public static Quaternion InvertTrackRotation(Quaternion rotation)
     {
-        Quaternion quat = Quaternion.Euler(0, 180, 0);
-        return quat * rotation;
+        var backwards = rotation * -Vector3.forward;
+        var up = rotation * Vector3.up;
+        return Quaternion.LookRotation(backwards, up);
     }
 
     //Calculate the intersection point of two lines. Returns true if lines intersect, otherwise false.
