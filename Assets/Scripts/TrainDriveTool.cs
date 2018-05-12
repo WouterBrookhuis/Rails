@@ -19,20 +19,26 @@ public class TrainDriveTool : Tool
     public override void OnWagonActivate(Wagon wagon, ActivateInfo info)
     {
         var loco = wagon.GetComponent<LocomotiveController>();
-        if(loco != null)
+   
+        if (loco != null)
         {
+            DeactivateLocomotiveGlow();
             locomotive = loco;
+            var glow = locomotive.GetComponent<GlowObject>();
+            glow.ActivateGlow();
             speedSlider.value = Mathf.Round(locomotive.targetSpeed) / multiplier;
         }
     }
 
     public override void OnNothingHit()
     {
+        DeactivateLocomotiveGlow();
         locomotive = null;
     }
 
     public override void OnTerrainHit(RaycastHit hit)
     {
+        DeactivateLocomotiveGlow();
         locomotive = null;
     }
 
@@ -41,6 +47,15 @@ public class TrainDriveTool : Tool
         if(locomotive != null)
         {
             locomotive.targetSpeed = speedSlider.value * multiplier;
+        }
+    }
+
+    private void DeactivateLocomotiveGlow()
+    {
+        if (locomotive != null)
+        {
+            var currentGlow = locomotive.GetComponent<GlowObject>();
+            currentGlow.DeactivateGlow();
         }
     }
 }
