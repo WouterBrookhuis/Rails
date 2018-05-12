@@ -8,6 +8,9 @@ public class FirstPersonController : MonoBehaviour
     public static FirstPersonController Main { get; private set; }
 
     public float scale = 1.0f;
+    public float minScale = 1.0f;
+    public float maxScale = 15.0f;
+    public float scaleSpeed = 10f;
     public float height = 2.0f;
     public float runSpeed = 20.0f;
     public float walkSpeed = 10.0f;
@@ -41,6 +44,7 @@ public class FirstPersonController : MonoBehaviour
         // Get input parameters
         var mouseInput = new Vector2(Input.GetAxisRaw("Mouse X"), invertMouseY ? Input.GetAxisRaw("Mouse Y") : -Input.GetAxisRaw("Mouse Y"));
         var walkInput = new Vector3(Input.GetAxisRaw("Horizontal"), 0, Input.GetAxisRaw("Vertical"));
+        var scaleInput = Input.GetAxisRaw("Mouse ScrollWheel");
         var speed = walkSpeed;
         if(walkInput.sqrMagnitude > 1)
         {
@@ -59,6 +63,9 @@ public class FirstPersonController : MonoBehaviour
         {
             SetMouseLock(!lockedMouse);
         }
+
+        // Do scale
+        scale = Mathf.Clamp(scale + scaleInput * scaleSpeed, minScale, maxScale);
 
         if(!disableLookWhenMouseUnlocked || lockedMouse)
         {
