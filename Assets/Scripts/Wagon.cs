@@ -18,6 +18,8 @@ public class Wagon : MonoBehaviour, IActivatable {
 
     public float drag = 1.0f;
 
+    private float wheelBase;
+
     /// <summary>
     /// Previous frame's speed
     /// </summary>
@@ -73,6 +75,10 @@ public class Wagon : MonoBehaviour, IActivatable {
             if(wheels.Length != 2)
             {
                 Debug.LogError("Wagon " + name + " does not have 2 wheel sets!");
+            }
+            else
+            {
+                wheelBase = Vector3.Distance(wheels[0].transform.position, wheels[1].transform.position);
             }
             couplers = transform.GetComponentsInChildren<Coupler>();
             if(couplers.Length != 2)
@@ -133,6 +139,11 @@ public class Wagon : MonoBehaviour, IActivatable {
         var position = Vector3.Lerp(wheels[0].Follower.Position, wheels[1].Follower.Position, delta);
         var rotation = Quaternion.LookRotation(wheels[0].Follower.Position - wheels[1].Follower.Position);
         transform.SetPositionAndRotation(position, rotation);
+
+        if(Vector3.Distance(wheels[0].Follower.Position, wheels[1].Follower.Position) > wheelBase + 1.0f)
+        {
+            Derail();
+        }
 
         previousSpeed = speed;
     }
