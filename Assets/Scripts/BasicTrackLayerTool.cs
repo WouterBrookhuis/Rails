@@ -3,7 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BasicTrackLayerTool : Tool {
+public class BasicTrackLayerTool : Tool
+{
 
     private TrackLayer trackLayer;
     public Switch switchPrefab;
@@ -45,11 +46,11 @@ public class BasicTrackLayerTool : Tool {
     {
         if(lastSection != trackLayer.CurrentSection)
         {
-            if(lastSection != null)
+            if(lastSection != null && lastSection.Component != null)
             {
                 lastSection.Component.GetComponent<GlowObject>().DeactivateGlow();
             }
-            if(trackLayer.CurrentSection != null)
+            if(trackLayer.CurrentSection != null && trackLayer.CurrentSection.Component != null)
             {
                 trackLayer.CurrentSection.Component.GetComponent<GlowObject>().ActivateGlow();
             }
@@ -73,6 +74,11 @@ public class BasicTrackLayerTool : Tool {
             }
             RemoveTrackSection(track);
         }
+    }
+
+    public override void OnTerrainHit(RaycastHit hit)
+    {
+        trackLayer.Reposition(null, false);
     }
 
     public override void OnTrackHover(TrackSectionComponent track, ActivateInfo info)
@@ -99,7 +105,7 @@ public class BasicTrackLayerTool : Tool {
             RaycastHit hit;
             if(FirstPersonController.Main.RaycastCameraForward(out hit, 1000.0f, terrainMask))
             {
-                section = trackLayer.StartTrack(hit.point + Vector3.up * 0.01f, Quaternion.FromToRotation(Vector3.forward, FirstPersonController.Main.transform.forward),
+                section = trackLayer.StartTrack(hit.point + Vector3.up * 0.01f, GetNewTrackRotation(hit),
                     length, -angle);
             }
         }
@@ -124,7 +130,7 @@ public class BasicTrackLayerTool : Tool {
             RaycastHit hit;
             if(FirstPersonController.Main.RaycastCameraForward(out hit, 1000.0f, terrainMask))
             {
-                section = trackLayer.StartTrack(hit.point + Vector3.up * 0.01f, Quaternion.FromToRotation(Vector3.forward, FirstPersonController.Main.transform.forward),
+                section = trackLayer.StartTrack(hit.point + Vector3.up * 0.01f, GetNewTrackRotation(hit),
                     length, angle);
             }
         }
@@ -149,7 +155,7 @@ public class BasicTrackLayerTool : Tool {
             RaycastHit hit;
             if(FirstPersonController.Main.RaycastCameraForward(out hit, 1000.0f, terrainMask))
             {
-                section = trackLayer.StartTrack(hit.point + Vector3.up * 0.01f, Quaternion.FromToRotation(Vector3.forward, FirstPersonController.Main.transform.forward), length);
+                section = trackLayer.StartTrack(hit.point + Vector3.up * 0.01f, GetNewTrackRotation(hit), length);
             }
         }
         if(section != null)
@@ -181,7 +187,7 @@ public class BasicTrackLayerTool : Tool {
             RaycastHit hit;
             if(FirstPersonController.Main.RaycastCameraForward(out hit, 1000.0f, terrainMask))
             {
-                section = trackLayer.StartTrack(hit.point + Vector3.up * 0.01f, Quaternion.FromToRotation(Vector3.forward, FirstPersonController.Main.transform.forward), 2.0f);
+                section = trackLayer.StartTrack(hit.point + Vector3.up * 0.01f, GetNewTrackRotation(hit), 2.0f);
             }
         }
         if(section != null)
@@ -229,7 +235,7 @@ public class BasicTrackLayerTool : Tool {
             RaycastHit hit;
             if(FirstPersonController.Main.RaycastCameraForward(out hit, 1000.0f, terrainMask))
             {
-                section = trackLayer.StartTrack(hit.point + Vector3.up * 0.01f, Quaternion.FromToRotation(Vector3.forward, FirstPersonController.Main.transform.forward), 2.0f);
+                section = trackLayer.StartTrack(hit.point + Vector3.up * 0.01f, GetNewTrackRotation(hit), 2.0f);
             }
         }
         if(section != null)
@@ -343,6 +349,12 @@ public class BasicTrackLayerTool : Tool {
         {
             trackLayer.CurrentSection = null;
         }
+    }
+
+    private Quaternion GetNewTrackRotation(RaycastHit hit)
+    {
+        var normalizedForward = Vector3.ProjectOnPlane(FirstPersonController.Main.pitchTransform.forward, hit.normal);
+        return Quaternion.LookRotation(normalizedForward, hit.normal);
     }
     
     public static void RemoveTrackSection(TrackSectionComponent component)

@@ -8,10 +8,10 @@ public class FirstPersonController : MonoBehaviour
     public static FirstPersonController Main { get; private set; }
 
     public float scale = 1.0f;
-    public float minScale = 1.0f;
-    public float maxScale = 15.0f;
-    public float scaleSpeed = 10f;
     public float height = 2.0f;
+    public float minHeight = 1.0f;
+    public float maxHeight = 2.5f;
+    public float scaleSpeed = 10f;
     public float runSpeed = 20.0f;
     public float walkSpeed = 10.0f;
     public float stepSpeed = 5.0f;
@@ -65,7 +65,7 @@ public class FirstPersonController : MonoBehaviour
         }
 
         // Do scale
-        scale = Mathf.Clamp(scale + scaleInput * scaleSpeed, minScale, maxScale);
+        height = Mathf.Clamp(height + scaleInput * scaleSpeed, minHeight, maxHeight);
 
         if(!disableLookWhenMouseUnlocked || lockedMouse)
         {
