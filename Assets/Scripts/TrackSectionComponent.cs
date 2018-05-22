@@ -64,8 +64,8 @@ public class TrackSectionComponent : MonoBehaviour, IActivatable {
 
     private Mesh CreateSectionMesh(TrackSection section)
     {
-        const float subLength = 4.0f;
-        const float subWidth = 4.0f;
+        float subLength = TrackFactory.Instance.trackLength;
+        float subWidth = TrackFactory.Instance.trackWidth;
 
         int subdivisions = Mathf.CeilToInt(section.Length / subLength);
         Mesh mesh = new Mesh();

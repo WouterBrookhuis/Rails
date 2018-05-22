@@ -7,10 +7,8 @@ public class BasicTrackLayerTool : Tool
 {
 
     private TrackLayer trackLayer;
-    public Switch switchPrefab;
     public float length = 5.0f;
     public float angle = 15.0f;
-    public Material trackMaterial;
     public LayerMask terrainMask;
     private TrackSection lastHighlightedSection;
     private bool shouldInvertOnReposition;
@@ -111,9 +109,7 @@ public class BasicTrackLayerTool : Tool
         }
         if(section != null)
         {
-            PlaceTrackGO(section, trackMaterial);
-            TryAutoConnect(section);
-            TrackDatabase.Instance.RegisterTrack(section);
+            TrackFactory.Instance.PlaceAndRegisterSection(section, true);
             DeselectIfConnected();
         }
     }
@@ -136,9 +132,7 @@ public class BasicTrackLayerTool : Tool
         }
         if(section != null)
         {
-            PlaceTrackGO(section, trackMaterial);
-            TryAutoConnect(section);
-            TrackDatabase.Instance.RegisterTrack(section);
+            TrackFactory.Instance.PlaceAndRegisterSection(section, true);
             DeselectIfConnected();
         }
     }
@@ -160,9 +154,7 @@ public class BasicTrackLayerTool : Tool
         }
         if(section != null)
         {
-            PlaceTrackGO(section, trackMaterial);
-            TryAutoConnect(section);
-            TrackDatabase.Instance.RegisterTrack(section);
+            TrackFactory.Instance.PlaceAndRegisterSection(section, true);
             DeselectIfConnected();
         }
     }
@@ -199,25 +191,12 @@ public class BasicTrackLayerTool : Tool
 
             // Create game objects and group them
             var group = new List<TrackSectionComponent>();
-            var entryGO = PlaceTrackGO(section, trackMaterial);
-            PlaceTrackGO(straight, trackMaterial).GetComponent<TrackSectionComponent>().AddToGroup(group);
-            PlaceTrackGO(right, trackMaterial).GetComponent<TrackSectionComponent>().AddToGroup(group);
-            entryGO.GetComponent<TrackSectionComponent>().AddToGroup(group);
+            TrackFactory.Instance.PlaceAndRegisterSection(section, true).AddToGroup(group);
+            TrackFactory.Instance.PlaceAndRegisterSection(straight, true).AddToGroup(group);
+            TrackFactory.Instance.PlaceAndRegisterSection(right, true).AddToGroup(group);
 
             // Add switch
-            var sw = Instantiate(switchPrefab);
-            sw.transform.SetParent(entryGO.transform);
-            sw.transform.localPosition = Vector3.left * 2;
-            sw.transform.localRotation = Quaternion.identity;
-            sw.junction = junction;
-            sw.Initialize();
-
-            TrackDatabase.Instance.RegisterTrack(section);
-            TrackDatabase.Instance.RegisterTrack(straight);
-            TrackDatabase.Instance.RegisterTrack(right);
-            TryAutoConnect(section);
-            TryAutoConnect(straight);
-            TryAutoConnect(right);
+            TrackFactory.Instance.AddSwitchToJunction(junction);
 
             DeselectIfConnected();
         }
@@ -247,26 +226,13 @@ public class BasicTrackLayerTool : Tool
 
             // Create game objects and group them
             var group = new List<TrackSectionComponent>();
-            var entryGO = PlaceTrackGO(section, trackMaterial);
-            PlaceTrackGO(straight, trackMaterial).GetComponent<TrackSectionComponent>().AddToGroup(group);
-            PlaceTrackGO(left, trackMaterial).GetComponent<TrackSectionComponent>().AddToGroup(group);
-            entryGO.GetComponent<TrackSectionComponent>().AddToGroup(group);
+            TrackFactory.Instance.PlaceAndRegisterSection(section, true).AddToGroup(group);
+            TrackFactory.Instance.PlaceAndRegisterSection(straight, true).AddToGroup(group);
+            TrackFactory.Instance.PlaceAndRegisterSection(left, true).AddToGroup(group);
 
             // Add switch
-            var sw = Instantiate(switchPrefab);
-            sw.transform.SetParent(entryGO.transform);
-            sw.transform.localPosition = Vector3.right * 2;
-            sw.transform.localRotation = Quaternion.identity;
-            sw.junction = junction;
             junction.Toggle();  // Select straight
-            sw.Initialize();
-
-            TrackDatabase.Instance.RegisterTrack(section);
-            TrackDatabase.Instance.RegisterTrack(straight);
-            TrackDatabase.Instance.RegisterTrack(left);
-            TryAutoConnect(section);
-            TryAutoConnect(straight);
-            TryAutoConnect(left);
+            TrackFactory.Instance.AddSwitchToJunction(junction);
 
             DeselectIfConnected();
         }
@@ -393,15 +359,5 @@ public class BasicTrackLayerTool : Tool
             TrackDatabase.Instance.DeregisterTrack(track.trackSection);
             GameObject.Destroy(track.gameObject);
         }
-    }
-
-    public static GameObject PlaceTrackGO(TrackSection section, Material trackMaterial)
-    {
-        var go = new GameObject("Track Section");
-        var tsc = go.AddComponent<TrackSectionComponent>();
-        tsc.SetTrackSection(section, trackMaterial);
-        var glow = go.AddComponent<GlowObject>();
-        glow.glowColor = Color.red;
-        return go;
     }
 }

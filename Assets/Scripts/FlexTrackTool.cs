@@ -147,31 +147,23 @@ public class FlexTrackTool : Tool
             {
                 // Place only curve
                 trackLayer.PlaceTrack(CalculateCurveLength(curve, 0, 0), curve);
-                TrackDatabase.Instance.RegisterTrack(trackLayer.CurrentSection);
-                BasicTrackLayerTool.PlaceTrackGO(trackLayer.CurrentSection, trackMaterial);
-                BasicTrackLayerTool.TryAutoConnect(trackLayer.CurrentSection);
+                TrackFactory.Instance.PlaceAndRegisterSection(trackLayer.CurrentSection, true);
             }
             else if(shortestDistance == d1)
             {
                 // Place curve first, then straight
                 trackLayer.PlaceTrack(CalculateCurveLength(curve, 0, straightLength), curve);
-                TrackDatabase.Instance.RegisterTrack(trackLayer.CurrentSection);
-                BasicTrackLayerTool.PlaceTrackGO(trackLayer.CurrentSection, trackMaterial);
+                TrackFactory.Instance.PlaceAndRegisterSection(trackLayer.CurrentSection);
                 trackLayer.PlaceTrack(straightLength);
-                TrackDatabase.Instance.RegisterTrack(trackLayer.CurrentSection);
-                BasicTrackLayerTool.PlaceTrackGO(trackLayer.CurrentSection, trackMaterial);
-                BasicTrackLayerTool.TryAutoConnect(trackLayer.CurrentSection);
+                TrackFactory.Instance.PlaceAndRegisterSection(trackLayer.CurrentSection, true);
             }
             else if(shortestDistance == d2)
             {
                 // Place straight first, then curve
                 trackLayer.PlaceTrack(straightLength);
-                TrackDatabase.Instance.RegisterTrack(trackLayer.CurrentSection);
-                BasicTrackLayerTool.PlaceTrackGO(trackLayer.CurrentSection, trackMaterial);
+                TrackFactory.Instance.PlaceAndRegisterSection(trackLayer.CurrentSection);
                 trackLayer.PlaceTrack(CalculateCurveLength(curve, straightLength, 0), curve);
-                TrackDatabase.Instance.RegisterTrack(trackLayer.CurrentSection);
-                BasicTrackLayerTool.PlaceTrackGO(trackLayer.CurrentSection, trackMaterial);
-                BasicTrackLayerTool.TryAutoConnect(trackLayer.CurrentSection);
+                TrackFactory.Instance.PlaceAndRegisterSection(trackLayer.CurrentSection, true);
             }
 
             trackLayer.Reposition(null, false);
@@ -182,9 +174,7 @@ public class FlexTrackTool : Tool
         {
             trackLayer.Reposition(fromSection, !fromEnd);
             trackLayer.PlaceTrack(Vector3.Distance(fromPoint, toPoint));
-            TrackDatabase.Instance.RegisterTrack(trackLayer.CurrentSection);
-            BasicTrackLayerTool.PlaceTrackGO(trackLayer.CurrentSection, trackMaterial);
-            BasicTrackLayerTool.TryAutoConnect(trackLayer.CurrentSection);
+            TrackFactory.Instance.PlaceAndRegisterSection(trackLayer.CurrentSection, true);
             return true;
         }
         return false;

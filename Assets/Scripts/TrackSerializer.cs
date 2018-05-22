@@ -7,9 +7,6 @@ using UnityEngine;
 
 public class TrackSerializer : AbstractSerializer
 {
-    public Material trackMaterial;
-    public Switch switchPrefab;
-
     private Dictionary<List<TrackSectionComponent>, ushort> trackGroupIds;
     private Dictionary<ushort, List<TrackSectionComponent>> sectionGroupIds;
     private Dictionary<uint, TrackSection> loadedSections;
@@ -79,7 +76,7 @@ public class TrackSerializer : AbstractSerializer
         var section = DeserializeTrackSection();
         var groupId = reader.ReadUInt16();
 
-        var component = BasicTrackLayerTool.PlaceTrackGO(section, trackMaterial).GetComponent<TrackSectionComponent>();
+        var component = TrackFactory.Instance.PlaceSectionGameObject(section);
         if(groupId != 0)
         {
             if(!sectionGroupIds.ContainsKey(groupId))
@@ -103,10 +100,7 @@ public class TrackSerializer : AbstractSerializer
         var pos = DeserializeVector3();
         var rot = DeserializeQuaternion();
         var junction = DeserializeJunction();
-        var sw = Instantiate(switchPrefab, pos, rot);
-        sw.junction = junction;
-        sw.Initialize();
-        sw.transform.SetParent(TrackDatabase.Instance.GetSection(junction.Entry.UniqueID).Component.transform, true);
+        var sw = TrackFactory.Instance.AddSwitchToJunction(junction);
         return sw;
     }
 
