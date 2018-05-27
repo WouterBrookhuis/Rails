@@ -29,6 +29,8 @@ public class Wagon : MonoBehaviour, IActivatable {
     public Coupler frontCoupler;
     public Coupler rearCoupler;
 
+    public Train Train { get; set; }
+
     public Wagon Next
     {
         get
@@ -62,8 +64,17 @@ public class Wagon : MonoBehaviour, IActivatable {
         get { return transform.rotation * Vector3.forward * previousSpeed; }
     }
 
-	// Use this for initialization
-	void Start () {
+    private void Awake()
+    {
+        // Ensure a train is set when awoken
+        if(Train == null)
+        {
+            Train = new Train(this);
+        }
+    }
+
+    // Use this for initialization
+    void Start () {
         FindComponents();
     }
 
@@ -232,24 +243,7 @@ public class Wagon : MonoBehaviour, IActivatable {
     {
         Debug.LogFormat("Wagon {0} coupled to {1}", name, to.name);
 
-        var sb = new StringBuilder();
-        var it = new TrainIterator(this, true);
-
-        // Move to end of train
-        Wagon lastWagon = this;
-        while(it.HasNext())
-        {
-            lastWagon = it.Next();
-        }
-        // Flip around iterator, so we now iterate from the back to the front
-        it.Flip();
-        sb.Append(lastWagon.name);
-        while(it.HasNext())
-        {
-            sb.AppendFormat(" - {0}", it.Next().name);
-        }
-
-        Debug.LogFormat("Train consist: {0}", sb.ToString());
+        Train.LogConsist();
     }
 }
 

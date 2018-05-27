@@ -29,6 +29,7 @@ public class Coupler : MonoBehaviour, IActivatable
         if(wagon.Placed == false || other.wagon.Placed == false) return;
         this.other = other;
         other.other = this;
+        Train.Join(wagon, other.wagon);
 
         wagon.OnCoupled(other.wagon);
         other.wagon.OnCoupled(wagon);
@@ -38,6 +39,7 @@ public class Coupler : MonoBehaviour, IActivatable
     {
         if(other != null)
         {
+            wagon.Train.SplitBetween(wagon, other.wagon);
             other.other = null;
             other.yawTransform.localRotation = other.restBackwards ? Quaternion.Euler(0, 180, 0) : Quaternion.identity;
             yawTransform.localRotation = restBackwards ? Quaternion.Euler(0, 180, 0) : Quaternion.identity;
